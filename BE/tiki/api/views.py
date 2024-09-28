@@ -338,6 +338,8 @@ def login(request):
                 'userID': user.id,
                 'email': user.email,
                 'username': user.username,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
                 'total_book': cart_order.total_book_type(),
             }, status=status.HTTP_200_OK)
         else:
