@@ -89,6 +89,12 @@ class OrderSerializer(serializers.ModelSerializer):
             OrderItem.objects.create(order=order, book=book, quantity=quantity)
 
         return order
+    
+class OrderAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status']
+
 
 
 

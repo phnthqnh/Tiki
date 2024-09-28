@@ -215,6 +215,65 @@ def delete_seller(request, pk):
     except Exception as e:
         # Xử lý ngoại lệ chung khác và trả về lỗi 500
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+def all_order(request):
+    try:
+        orders = Order.objects.all()
+        result = []
+        for order in orders:
+            order_item = OrderItem.objects.filter(order = order)
+            items_data = [
+                {
+                    'id' : item.book.id,
+                    'name': item.book.name,
+                    'original_price': item.book.original_price,
+                    'price': item.book.price,
+                    'quantity': item.quantity,
+                    'total': item.book.price * item.quantity,
+                }
+                for item in order_item
+            ]
+            order_data = {
+                    'tracking_number': order.tracking_number,
+                    'user': {
+                        'id': order.user.id,
+                        'username': order.user.username,
+                        'email': order.user.email,
+                    },
+                    'status': order.status,
+                    'tongtien': order.tongtien,
+                    'book': items_data,
+                }
+            
+            result.append(order_data)
+
+        return Response(result, status=200)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['POST'])
+def update_order(request, mvd):
+    try:
+        order = Order.objects.get(tracking_number=mvd)
+    except Order.DoesNotExist: 
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
+    serializer = OrderAdminSerializer(instance=order, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def register(request):

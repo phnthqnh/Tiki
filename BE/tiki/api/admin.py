@@ -22,7 +22,10 @@ admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Category)
 admin.site.register(Seller)
 admin.site.register(Image)
-admin.site.register(Book)
+
+class BookAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'quantity_in_stock']
+admin.site.register(Book, BookAdmin)
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['tracking_number', 'user', 'tongtien', 'status']

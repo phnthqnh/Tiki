@@ -128,7 +128,7 @@ class Book(models.Model):
     short_description = models.TextField()
     # thêm số lượng trong kho
     quantity_in_stock = models.PositiveIntegerField(default=0)
-    list_price = models.IntegerField()
+    list_price = models.IntegerField(null=True, blank=True)
     price = models.IntegerField()
     original_price = models.IntegerField()
     rating_average = models.DecimalField(max_digits=3, decimal_places=2)
@@ -153,8 +153,8 @@ class Book(models.Model):
         return self.name
 
     def cal_percent(self):
-        if self.list_price > 0:
-            return round((1 - (self.price / self.list_price)) * 100, 2)
+        if self.original_price > 0:
+            return round((1 - (self.price / self.original_price)) * 100, 2)
         return 0
 
     def clean(self):
