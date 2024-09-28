@@ -1,0 +1,28 @@
+.checkbox-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.checkbox-list li {
+    margin-bottom: 10px;
+}
+
+.checkbox {
+    margin-right: 10px;
+}
+input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: #ccc; /* Light grey color */
+}
+
+.see-more {
+    color: blue;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.category {
+    max-height: 200px;
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung vượt quá chiều cao */
+}

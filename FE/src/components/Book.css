@@ -1,0 +1,84 @@
+.box8 {
+    font-size: 0.75rem;
+}
+
+.book-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 3em; /* Chiều cao tối đa tương ứng với số dòng */
+    line-height: 1.5em; /* Chiều cao dòng, điều chỉnh theo font-size */
+}
+.box8 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 2em; /* Chiều cao tối đa tương ứng với số dòng */
+    line-height: 10px; /* Chiều cao dòng, điều chỉnh theo font-size */
+}
+
+#IMG_2 {
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    margin: 0 4px 0 0;
+    border-radius: 50%;
+    cursor: pointer;
+
+}
+
+#A_2 {
+    width: auto;
+    color: rgb(128, 128, 137);
+    text-decoration: none;
+    font: 14px / 21px Inter, Helvetica, Arial, sans-serif;
+    text-size-adjust: 100%;
+    cursor: pointer;
+}
+
+
+#gia {
+    position: absolute;
+    bottom: 10px; /* Khoảng cách từ dưới lên */
+    left: 10px; /* Khoảng cách từ trái sang */
+    right: 10px; /* Khoảng cách từ phải sang */
+    width: auto;
+    padding: 6px 0 0;
+    box-sizing: border-box;
+    border-top: 0.8px solid #ebebf0;
+}
+
+.account-dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* Đặt vị trí ngay dưới icon tài khoản */
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.dropdown-menu a {
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f2f2f2;
+}

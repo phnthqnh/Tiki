@@ -1,0 +1,30 @@
+.account-dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* Đặt vị trí ngay dưới icon tài khoản */
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.dropdown-menu a {
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f2f2f2;
+}
