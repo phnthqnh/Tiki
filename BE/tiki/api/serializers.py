@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import *
-from django.contrib.auth import authenticate 
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -21,7 +20,6 @@ class UserLoginSerializer(serializers.Serializer):
     #     fields = ['username', 'email']  # Hoặc thêm các trường cần thiết khác
 
 
-# from django.contrib.auth.models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,12 +106,12 @@ class ImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['name']
 
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
-        fields = ['id', 'name']
+        fields = ['name']
 
 class BookSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)

@@ -1,31 +1,7 @@
 from typing import Iterable
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
-from django.contrib.auth.hashers import make_password, check_password
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.core.exceptions import ValidationError
-
-# class UserAccount(models.Model):
-#     username = models.CharField(max_length=255)
-#     email = models.EmailField(unique=True)
-#     password = models.CharField(max_length=50)  # Mật khẩu sẽ được hash
-#     is_active = models.BooleanField(default=True)
-
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = ['email', 'password']
-
-#     def save(self, *args, **kwargs):
-#         if self.password and not self.password.startswith('pbkdf2:'):
-#             self.password = make_password(self.password)
-#         super().save(*args, **kwargs)
-
-#     def __str__(self):
-#         return self.username
-
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
 from django.contrib.auth import get_user_model
 
 class UserAccountManager(BaseUserManager):
@@ -143,7 +119,6 @@ class Image(models.Model):
 
     def __str__(self):
         return self.base_url
-from django.core.exceptions import ValidationError
 
 class Book(models.Model):
     id = models.AutoField(primary_key=True)

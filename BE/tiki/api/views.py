@@ -1,10 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import *
 from rest_framework.response import Response
 from .serializers import *
-from rest_framework.decorators import api_view
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['GET'])
 def search(request):
@@ -60,11 +63,158 @@ def book_detail(request, pk):
         return Response(serializer.data)
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=404)
+    
+
+@api_view(['GET'])
+def get_all_books(request):
+    try:
+        books = Book.objects.all()
+        r = []
+        for book in books:
+            serializer = BookSerializer(book)
+            img = serializer.data['images'][0]
+            b = {
+                'id': book.id,
+                'image': img['thumbnail_url'],
+                'name': book.name,
+                'author': book.author,
+                'original_price': book.original_price,
+                'price': book.price,
+                'quantity_sold': book.quantity_sold,
+                'quantity_in_stock': book.quantity_in_stock,
+            }
+            r.append(b)
+        return Response(r, status=200)
+    except Book.DoesNotExist:
+        return Response({'error': 'Book not found'}, status=404)
 
 
-# views.py
-# from django.contrib.auth import authenticate
-# from rest_framework import status
+@api_view(['POST'])
+def create_book(request):
+    serializer = BookSerializer(data=request.data)
+    if serializer.is_valid():
+        categories = request.data['categories']
+        current_seller = request.data['current_seller'] 
+
+        if not categories or not current_seller:
+            return Response({"error": "categories and current_seller are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Lấy đối tượng Category và Seller từ ID
+            category = Category.objects.get(id=categories['id'])
+            seller = Seller.objects.get(id=current_seller['id'])
+        except Category.DoesNotExist:
+            return Response({"error": "Category not found."}, status=status.HTTP_400_BAD_REQUEST)
+        except Seller.DoesNotExist:
+            return Response({"error": "Seller not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save(categories=category, current_seller=seller)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def update_book(request, pk):
+    try:
+        # Lấy user có username là `un`
+        book = Book.objects.get(id=pk)
+
+        # Cập nhật thông tin sách từ dữ liệu trong request
+        serializer = BookSerializer(book, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Book.DoesNotExist:
+        # Trả về lỗi nếu sách không tồn tại
+        return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Xử lý ngoại lệ chung khác và trả về lỗi 500
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+def delete_book(request, pk):
+    try:
+        book = Book.objects.get(id=pk)
+        # Xóa sách
+        book.delete()
+        # Trả về thông báo xóa thành công
+        return Response({'detail': 'Book deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Book.DoesNotExist:
+        # Trả về l��i nếu sách không tồn tại
+        return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Xử lý ngoại lệ chung khác và trả về lỗi 500
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_all_seller(request):
+    try:
+        sellers = Seller.objects.all()
+        r = []
+        for seller in sellers:
+            # serializer = SellerSerializer(seller)
+            s = {
+                'id': seller.id,
+                'name': seller.name
+            }
+            r.append(s)
+        return Response(r, status=200)
+    except Book.DoesNotExist:
+        return Response({'error': 'Seller not found'}, status=404)
+
+@api_view(['POST'])
+def create_seller(request):
+    name = request.data.get('name')
+
+    if not name:
+        return Response({"error": "name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    serializer = SellerSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def update_seller(request, pk):
+    try:
+        # Lấy user có username là `un`
+        seller = Seller.objects.get(id=pk)
+
+        # Cập nhật thông tin sách từ dữ liệu trong request
+        serializer = SellerSerializer(seller, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Seller.DoesNotExist:
+        # Trả về lỗi nếu sách không tồn tại
+        return Response({'error': 'Seller not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Xử lý ngoại lệ chung khác và trả về lỗi 500
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+def delete_seller(request, pk):
+    try:
+        seller = Seller.objects.get(id=pk)
+        # Xóa sách
+        seller.delete()
+        # Trả về thông báo xóa thành công
+        return Response({'detail': 'Seller deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Seller.DoesNotExist:
+        # Trả về l��i nếu sách không tồn tại
+        return Response({'error': 'Seller not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Xử lý ngoại lệ chung khác và trả về lỗi 500
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 def register(request):
@@ -89,8 +239,6 @@ def register(request):
             }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated]) 
 def change_password(request, un):
@@ -108,13 +256,6 @@ def change_password(request, un):
         return Response({"message": "Đổi mật khẩu thành công."}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['POST'])
 # @permission_classes([AllowAny])  # Cho phép bất kỳ ai cũng có thể truy cập vào view này
@@ -145,8 +286,6 @@ def login(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 @api_view(['GET'])
 def get_user_cart(request, un):
@@ -210,7 +349,6 @@ def get_total_book_type(request, un):
     except CartOrder.DoesNotExist:
         return Response({'error': 'User does not have a cart'}, status=status.HTTP_404_NOT_FOUND)
 
-from django.shortcuts import get_object_or_404
 
 @api_view(['POST'])
 def add_book_to_cart(request, un):
