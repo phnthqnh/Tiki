@@ -7,9 +7,9 @@ const userApi = {
         const data = { email, password }; // Đảm bảo đối tượng data gửi lên là {email, password}
         return axiosClient.post(url, data).then(response => response);
     },
-    register(username, email, password) {
+    register(username, email, password, is_staff) {
         const url = '/register/';
-        const data = { username, email, password }; // Đảm bảo đối tượng data gửi lên là {email, password}
+        const data = { username, email, password, is_staff }; // Đảm bảo đối tượng data gửi lên là {email, password}
         return axiosClient.post(url, data).then(response => response);
     },
 };

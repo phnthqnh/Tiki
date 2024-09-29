@@ -23,17 +23,20 @@ const Login = () => {
                 localStorage.setItem('username', response.username);
                 localStorage.setItem('userID', response.userID);
                 localStorage.setItem('total_book', response.total_book);
+                localStorage.setItem('is_staff', response.is_staff);
                 // kiểm tra xem username đã được lưu vào localStorage hay chưa, kiểm tra bằng console
                 // console.log('access_token:', localStorage.getItem('access_token'));
-                console.log('refresh_token:', localStorage.getItem('refresh_token'));
-                console.log('userID:', localStorage.getItem('userID'));
-                console.log('total_book:', localStorage.getItem('total_book'));
+                // console.log('is_staff:', response.is_staff);
+                // console.log('is_superuser:', response.is_superuser);
 
-                console.log('email:', email);
-                console.log('Token:', localStorage.getItem('access_token'));
-
-                alert('Đăng nhập thành công!');
-                navigate('/'); // Chuyển hướng về trang home
+                if (response.is_staff == true) {
+                    navigate('/ad');
+                    alert('Bạn đã đăng nhập với tư cách là người bán!')
+                }
+                else {
+                    alert('Bạn đã đăng nhập với tư cách là người mua!');
+                    navigate('/'); // Chuyển hướng về trang home
+                }
             } else {
                 throw new Error('Đăng nhập thất bại');
             }

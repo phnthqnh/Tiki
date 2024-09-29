@@ -14,6 +14,8 @@ import Order from './pages/Order.jsx';
 import MyOrder from './pages/MyOrder.jsx'
 import Profile from './pages/Profile.jsx'
 import MyOrderDetail from './pages/MyOrderDetail.jsx'
+import HomeAdmin from './pages/HomeAdmin.jsx'
+import BookAdminDetail from './pages/BookAdminDetail.jsx'
 
 const router = createBrowserRouter ([
     {
@@ -23,6 +25,10 @@ const router = createBrowserRouter ([
     {
       path: '/',
       element: <Home />
+    },
+    {
+        path: '/ad',
+        element: <HomeAdmin />
     },
     {
         path: '/book/:id',
@@ -83,6 +89,10 @@ const router = createBrowserRouter ([
     {
         path: '/myorder/:mvd',
         element: <MyOrderDetail />
+    },
+    {
+        path: '/ad/book/:id/update',
+        element: <BookAdminDetail />
     },
 ])
 

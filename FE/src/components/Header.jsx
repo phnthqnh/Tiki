@@ -21,21 +21,36 @@ function Header() {
 
     const username = localStorage.getItem('username');
     const isLoggedIn = Boolean(username); // Trả về true nếu username tồn tại, ngược lại false
+    const [is_staff, setIsStaff] = useState(false);
+    // const is_staff = false
 
-    console.log('Location', location.pathname);
+    // Kiểm tra giá trị khi load component
+    useEffect(() => {
+        const is_staff = localStorage.getItem('is_staff');
+        setIsStaff(is_staff === 'true'); // Đảm bảo so sánh đúng kiểu
+    }, []);
+
+
     const handleCartClick = (e) => {
         if (!isLoggedIn) {
             e.preventDefault(); // Ngăn chặn hành vi mặc định của <Link>
             alert("Chưa đăng nhập, vui lòng đăng nhập trước!");
             navigate('/login');
+            return;
         }
-        if (location.pathname !== `/buy/cart/${username}`) {
+        if (is_staff) {
             e.preventDefault();
-            navigate(`/buy/cart/${username}`);
+            alert("Admin không có giỏ hàng");
+            navigate('/ad');
+            return;
         }
         if (location.pathname === `/buy/cart/${username}`) {
             e.preventDefault();
             alert("Bạn đang ở trong giỏ hàng!");
+        }
+        else {
+            e.preventDefault();
+            navigate(`/buy/cart/${username}`);
         }
     };
 
@@ -63,6 +78,7 @@ function Header() {
             localStorage.removeItem('access');
             localStorage.removeItem('refresh');
             localStorage.removeItem('username');
+            localStorage.removeItem('is_staff');
             alert('Đăng xuất thành công!');
             // setUsername(null);
 
@@ -72,19 +88,16 @@ function Header() {
             // window.location.reload(); // Tải lại trang để cập nhật giao diện
         }
     };
-
-    // Hàm xử lý khi nhấn vào một cuốn sách
-    // const handleCartClick = (un) => {
-    //     navigate(`/cart/${un}`);
-    // };
+    console.log('is_staff: ', is_staff)
+    
 
     return <>
         <Navbar expand="lg" className="d-none d-sm-block back-color">
             {/* Màn hình to */}
             <Container className="d-flex" id="nav">
                 <Col id="logo" className="me-3">
-                    <Navbar href="/" className="d-none d-sm-block">
-                        <a href="/" className="flex-column align-items-center text-decoration-none">
+                    <Navbar className="d-none d-sm-block">
+                        <a href={is_staff ? "/ad" : "/"}  className="flex-column align-items-center text-decoration-none">
                             <img 
                             src={photo} 
                             alt="Tiki Logo"
@@ -98,13 +111,13 @@ function Header() {
                 </Col>
                 <Col sm={3} id="toggle">
                     <Navbar.Collapse id="responsive-navbar-nav">
-                        <Link className='ms-5 link-underline link-underline-opacity-0' to="/">
+                        <Link className='ms-5 link-underline link-underline-opacity-0'  to={is_staff ? "/ad" : "/"}>
                             <img
                                 src="https://salt.tikicdn.com/ts/upload/b4/90/74/6baaecfa664314469ab50758e5ee46ca.png"
                                 alt="header_menu_item_home"
                                 id="IMG_2"
                             />
-                            <a rel="nofollow" id="A_2" href='/'>
+                            <a rel="nofollow" id="A_2">
                                 Trang chủ
                             </a>
                         </Link>
@@ -123,9 +136,19 @@ function Header() {
                                 <span id="A_2">{username}</span>
                                 {showDropdown && (
                                 <div className="dropdown-menu">
-                                    <Link to="/profile">Thông tin cá nhân</Link>
-                                    <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
-                                    <Link onClick={handleLogout}>Đăng xuất</Link>
+                                    {is_staff ? (
+                                        <>
+                                        <Link to="/profile">Thông tin cá nhân</Link>
+                                        {/* <Link to={`/myorder/`}>Đơn hàng của tôi</Link> */}
+                                        <Link onClick={handleLogout}>Đăng xuất</Link>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <Link to="/profile">Thông tin cá nhân</Link>
+                                        <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
+                                        <Link onClick={handleLogout}>Đăng xuất</Link>
+                                    </>
+                                    )}
                                 </div>
                                 )}
                             </Link>
@@ -142,19 +165,24 @@ function Header() {
                         <img className='ps-5' src={ngan} alt="" />
                     </Navbar.Collapse>
                 </Col>
-                {/* Giỏ hàng */}
-                <Link className="nav-link d-none d-sm-block" 
-                    to={`cart/${username}`} 
-                    style={{ position: 'relative' }}
-                    onClick={handleCartClick}>
-                    <div id="cart">
-                        <i className="bi bi-cart2 cart-color"></i>
-                        <span class="position-absolute translate-middle badge rounded-pill bg-danger">
-                        {totalBook}
-                        {/* {cartItems.length} */}
-                        </span>
-                    </div>
-                </Link>
+                    {/* Giỏ hàng */}
+                    { is_staff ? (
+                        <div></div>
+                    ) : (
+                        <Link className="nav-link d-none d-sm-block" 
+                            to={`cart/${username}`} 
+                            style={{ position: 'relative' }}
+                            onClick={handleCartClick}>
+                            <div id="cart">
+                                <i className="bi bi-cart2 cart-color"></i>
+                                <span class="position-absolute translate-middle badge rounded-pill bg-danger">
+                                {totalBook}
+                                {/* {cartItems.length} */}
+                                </span>
+                            </div>
+                        </Link>
+                    )
+                }
             </Container>
         </Navbar>
         <Navbar expand="lg" className="d-sm-none back-color">

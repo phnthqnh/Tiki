@@ -164,9 +164,11 @@ def import_data_from_json(json_data):
         images = item.get('images', [])
         image_objects = []
         for img in images:
+            book_name = item['name']
             image, _ = Image.objects.get_or_create(
                 base_url=img['base_url'],
                 defaults={
+                    'name': book_name,
                     'large_url': img['large_url'],
                     'medium_url': img['medium_url'],
                     'small_url': img['small_url'],

@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.pagination import PageNumberPagination
 
 @api_view(['GET'])
 def search(request):
@@ -68,14 +69,24 @@ def book_detail(request, pk):
 @api_view(['GET'])
 def get_all_books(request):
     try:
+        # Lấy tất cả sách từ cơ sở dữ liệu
         books = Book.objects.all()
+        paginator = PageNumberPagination()
+        
+        # Thiết lập số sách trên mỗi trang là 15
+        paginator.page_size = 10
+        
+        # Phân trang dựa trên request
+        result_page = paginator.paginate_queryset(books, request)
+        
+        # Chuyển đổi các đối tượng sách thành định dạng mong muốn
         r = []
-        for book in books:
+        for book in result_page:
             serializer = BookSerializer(book)
-            img = serializer.data['images'][0]
+            img = serializer.data['images'][0] if serializer.data['images'] else None
             b = {
                 'id': book.id,
-                'image': img['thumbnail_url'],
+                'image': img['thumbnail_url'] if img else '',
                 'name': book.name,
                 'author': book.author,
                 'original_price': book.original_price,
@@ -84,7 +95,13 @@ def get_all_books(request):
                 'quantity_in_stock': book.quantity_in_stock,
             }
             r.append(b)
-        return Response(r, status=200)
+        
+        # Trả về kết quả với tổng số trang
+        return Response({
+            'books': r,
+            'total_pages': paginator.page.paginator.num_pages,
+        }, status=200)
+    
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=404)
 
@@ -161,7 +178,7 @@ def get_all_seller(request):
                 'name': seller.name
             }
             r.append(s)
-        return Response(r, status=200)
+        return Response({"sellers": r}, status=200)
     except Book.DoesNotExist:
         return Response({'error': 'Seller not found'}, status=404)
 
@@ -284,7 +301,8 @@ def register(request):
     if serializer.is_valid():
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
-        username = serializer.validated_data['email']
+        username = serializer.validated_data['username']
+        is_staff = serializer.validated_data['is_staff']
 
         serializer.save()
         # Trả về thông tin người dùng vừa đăng ký
@@ -295,6 +313,7 @@ def register(request):
                 'username': user.username,
                 'email': user.email,
                 'password': user.password,
+                'is_staff': user.is_staff,
             }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

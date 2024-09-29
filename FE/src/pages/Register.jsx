@@ -7,6 +7,7 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
+    const [is_staff, setStaff] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -18,13 +19,14 @@ const Register = () => {
             username: username,
             email: email,
             password: password,
+            is_staff: is_staff,
         };
 
-        console.log("heheeee", username, email, password)
+        console.log("heheeee", username, email, password, is_staff);
         console.log("heheeee", userData)
 
         try {
-            const response = await userApi.register(username, email, password);
+            const response = await userApi.register(username, email, password, is_staff);
             console.log("he", response)
             // Kiểm tra nếu đăng ký thành công
             if (response) {
@@ -45,6 +47,9 @@ const Register = () => {
         }
         
     };
+    const handleCheckboxChange = (e) => {
+        setStaff(e.target.checked); // Cập nhật `is_staff` dựa trên `e.target.checked`
+      };
 
     // return (
     //     <div>
@@ -113,6 +118,17 @@ const Register = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                    />
+                </div>
+                {/* tạo check-box xác định xem người đó có phải staff hay không */}
+                <div className="form-check mb-3">
+                    <label className="form-check-label fw-bold" htmlFor="staff">Staff</label>
+                    <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="staff"
+                        checked={is_staff} // Giá trị `checked` được ràng buộc với `is_staff`
+                        onChange={handleCheckboxChange} // Gọi hàm khi có sự thay đổi
                     />
                 </div>
                 {error && <div className="alert alert-danger">{error}</div>}
