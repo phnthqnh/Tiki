@@ -132,7 +132,7 @@ class Book(models.Model):
     price = models.IntegerField()
     original_price = models.IntegerField()
     rating_average = models.DecimalField(max_digits=3, decimal_places=2)
-    book_cover = models.ImageField(upload_to='book_covers/', null=True, blank=True)
+    book_cover = models.FileField(upload_to='book_covers/', null=True, blank=True) #Đổi kiểu dữ liệu của book_cover thành FileField (Tác dụng tương tự như ImageField)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
     current_seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     images = models.ManyToManyField(Image)
