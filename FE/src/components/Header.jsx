@@ -10,22 +10,32 @@ import { CartContext } from "./CartContext"
 import photo from '../images/logo.png'
 import cartApi from '../api/cart'
 import './Book.css'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 function Header() {
     const { cartItems, setCartItems } = useContext(CartContext); // Lấy thông tin giỏ hàng từ CartContext
     const [totalBook, setTotalBook] = useState(0); // Trạng thái để lưu tổng số sách
     const [showDropdown, setShowDropdown] = useState(false)
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const username = localStorage.getItem('username');
     const isLoggedIn = Boolean(username); // Trả về true nếu username tồn tại, ngược lại false
 
+    console.log('Location', location.pathname);
     const handleCartClick = (e) => {
         if (!isLoggedIn) {
-        e.preventDefault(); // Ngăn chặn hành vi mặc định của <Link>
-        alert("Chưa đăng nhập, vui lòng đăng nhập trước!");
-        navigate('/login');
+            e.preventDefault(); // Ngăn chặn hành vi mặc định của <Link>
+            alert("Chưa đăng nhập, vui lòng đăng nhập trước!");
+            navigate('/login');
+        }
+        if (location.pathname !== `/buy/cart/${username}`) {
+            e.preventDefault();
+            navigate(`/buy/cart/${username}`);
+        }
+        if (location.pathname === `/buy/cart/${username}`) {
+            e.preventDefault();
+            alert("Bạn đang ở trong giỏ hàng!");
         }
     };
 
@@ -129,28 +139,6 @@ function Header() {
                                 <span id="A_2">{"Tài khoản"}</span> 
                             </Link>
                         )}
-                        {/* Dropdown menu cho tài khoản */}
-                        {/* <div
-                            className="account-dropdown ms-4"
-                            onMouseEnter={() => setShowDropdown(true)} // Hiện menu khi hover vào icon tài khoản
-                            onMouseLeave={() => setShowDropdown(false)} // Ẩn menu khi chuột ra khỏi
-                            style={{ position: 'relative', cursor: 'pointer' }}
-                        >
-                            <img
-                                src="https://salt.tikicdn.com/ts/upload/07/d5/94/d7b6a3bd7d57d37ef6e437aa0de4821b.png"
-                                alt="header_header_account_img"
-                                id="IMG_2"
-                            />
-                            <span id="A_2">{username ? username : "Tài khoản"}</span>
-                            {/* Menu hiện ra khi hover *
-                            {showDropdown && (
-                                <div className="dropdown-menu">
-                                    <Link to="/profile">Thông tin cá nhân</Link>
-                                    <Link to={`/ordered/${username}`}>Đơn hàng của tôi</Link>
-                                    <Link onClick={handleLogout}>Đăng xuất</Link>
-                                </div>
-                            )}
-                        </div> */}
                         <img className='ps-5' src={ngan} alt="" />
                     </Navbar.Collapse>
                 </Col>

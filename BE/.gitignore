@@ -1,1 +1,7 @@
 venv/
+# Bỏ qua các file tạm thời của Python
+__pycache__/
+*.pyc
+
+# Bỏ qua các file log
+*.log
