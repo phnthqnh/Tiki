@@ -88,7 +88,6 @@ function Header() {
             // window.location.reload(); // Tải lại trang để cập nhật giao diện
         }
     };
-    console.log('is_staff: ', is_staff)
     
 
     return <>

@@ -770,7 +770,7 @@ def category_list(request):
                 'name': category.name
             }
             r.append(s)
-        return Response(r, status=200)
+        return Response({"categories": r}, status=200)
     except Category.DoesNotExist:
         return Response({'error': 'Category not found'}, status=404)
     
@@ -779,49 +779,34 @@ def category_list(request):
 def add_category(request):
     try:
         # Lấy dữ liệu từ request
-        id = request.data.get('id')
         name = request.data.get('name')
 
         # Kiểm tra nếu 'name' bị thiếu
         if not name:
             return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not id:
-            return Response({'error': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Tạo một thể loại mới với UUID tự động
-        category = Category.objects.create(id=id, name=name)
-        category.save()
-
-        return Response({
-            'id': category.id,
-            'name': category.name
-        }, status=status.HTTP_201_CREATED)
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 # Sửa thể loại sách
-@api_view(['PUT'])
+@api_view(['POST'])
 def update_category(request, category_id):
     try:
         # Lấy thể loại dựa trên ID
         category = Category.objects.get(id=category_id)
         
-        # Lấy dữ liệu từ request
-        name = request.data.get('name')
-
-        # Kiểm tra nếu 'name' bị thiếu
-        if not name:
-            return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Cập nhật tên thể loại
-        category.name = name
-        category.save()
-
-        return Response({
-            'id': category.id,
-            'name': category.name
-        }, status=status.HTTP_200_OK)
+        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     except Category.DoesNotExist:
         return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)

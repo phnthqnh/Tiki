@@ -31,6 +31,6 @@ urlpatterns = [
     # Xem, them, sua, xoa danh sach the loai
     path('ad/categories', category_list, name='get_categories_list'),
     path('ad/add_category', add_category, name='add_category'),
-    path('ad/upgrade_category/<int:category_id>/', update_category, name='update_category'),
+    path('ad/update_category/<int:category_id>/', update_category, name='update_category'),
     path('ad/delete_category/<int:category_id>/', delete_category, name='delete_category'),
 ]

@@ -6,6 +6,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import './Home.css';
 import sellerApi from "../api/seller";
+import categoryApi from "../api/category";
+import { Modal, Button, Form } from 'react-bootstrap';
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -27,6 +29,132 @@ function HomeAdmin() {
     const [sellers, setSellers] = useState([]); // Sách lấy từ backend
     const [filteredSellers, setFilteredSellers] = useState([]); // Dữ liệu sellers
     const [currentView, setCurrentView] = useState('books');
+    const [categories, setCategories] = useState([]);
+    const [filteredCategories, setFilteredCategories] = useState([]);
+
+    // Thông tin cho việc thêm mới thể loại và người bán
+    const [cateName, setCateName] = useState('');
+    const [cateId, setCateId] = useState(null);
+
+    const [sellerName, setSellerName] = useState('');
+    const [sellerId, setSellerId] = useState(null);
+
+    // Xử lý việc mở hộp thoại thêm mới
+    const [activeModal, setActiveModal] = useState(null);
+    const handleShow = (modalName, id) => {
+        setActiveModal(modalName);
+        setSellerId(id);
+        setCateId(id);
+    };
+    const handleClose = () => setActiveModal(null);    
+    
+
+    // Thêm thể loại
+    const handleAddCategory = async () => {
+        try {
+            await categoryApi.addCategory(cateName);
+            alert("Thêm mới thể loại thành công");
+            setCateName('');
+            handleClose();
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+        } catch(error) {
+            console.error("Có lỗi xảy ra khi thêm thể loại:", error);
+            alert("Có lỗi xảy ra khi thêm thể loại."); 
+        }
+    };
+
+    const handleUpdateCategory = async () => {
+        try {
+            await categoryApi.updateCategory(cateId, cateName);
+            alert("Cập nhật thể loại thành công");
+            
+            setCateName(''); 
+            handleClose();
+            
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi cập nhật thể loại:", error);
+            alert("Có lỗi xảy ra khi cập nhật thể loại.");
+        }
+    };
+
+    const handleDeleteCategory = async () => {
+        try {
+            await categoryApi.deleteCategory(cateId); 
+            alert("Xóa thể loại thành công");
+    
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+    
+            handleClose(); // Đóng modal
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi xóa thể loại:", error);
+            alert("Có lỗi xảy ra khi xóa thể loại");
+        }
+        };
+
+    //Thêm người bán
+    const handleAddSeller = async () => {
+        try {
+            await sellerApi.addSeller(sellerName);
+            alert("Thêm mới người bán thành công");
+            setSellerName('');
+            handleClose();
+            //Cập nhật lại danh sách
+            const response = await sellerApi.getAllSeller();
+            setSellers(response.sellers)
+            setFilteredSellers(response.sellers);
+        } catch(error) {
+            console.error("Có lỗi xảy ra khi thêm người bán:", error);
+            alert("Có lỗi xảy ra khi thêm người bán."); 
+        }
+    };
+
+    //Sửa người bán
+    const handleUpdateSeller = async () => {
+        try {
+            // Giả sử sellerId là ID của người bán cần cập nhật
+            await sellerApi.updateSeller(sellerId, sellerName);
+            alert("Cập nhật người bán thành công");
+            
+            setSellerName(''); // Reset tên người bán
+            handleClose(); // Đóng modal
+            
+            // Cập nhật lại danh sách người bán
+            const response = await sellerApi.getAllSeller();
+            setSellers(response.sellers); // Cập nhật state
+            setFilteredSellers(response.sellers); // Cập nhật danh sách đã lọc (nếu có)
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi cập nhật người bán:", error);
+            alert("Có lỗi xảy ra khi cập nhật người bán.");
+        }
+    };
+
+    const handleDeleteSeller = async () => {
+    try {
+        // Gọi API để xóa người bán theo ID
+        await sellerApi.deleteSeller(sellerId); // sellerId là ID của người bán cần xóa
+        alert("Xóa người bán thành công");
+
+        // Cập nhật lại danh sách người bán
+        const response = await sellerApi.getAllSeller();
+        setSellers(response.sellers);
+        setFilteredSellers(response.sellers);
+
+        handleClose(); // Đóng modal
+    } catch (error) {
+        console.error("Có lỗi xảy ra khi xóa người bán:", error);
+        alert("Có lỗi xảy ra khi xóa người bán.");
+    }
+    };
 
     // Fetch dữ liệu sách từ API khi component được mount hoặc khi currentPage thay đổi
     useEffect(() => {
@@ -56,7 +184,7 @@ function HomeAdmin() {
             const fetchSellers = async () => {
                 try {
                     const response = await sellerApi.getAllSeller(); // Sử dụng phương thức getUserOrder
-                    console.log('response', response)
+                    console.log('DL người bán:', response)
                     setSellers(response.sellers)
                     setFilteredSellers(response.sellers);
                     // setOrders(response); // Lưu danh sách đơn hàng vào state
@@ -66,6 +194,19 @@ function HomeAdmin() {
             };
     
             fetchSellers(); 
+        } else if (currentView === 'categories') {
+            const fetchCategories = async () => {
+                try {
+                    const response = await categoryApi.getAllCategory();
+                    console.log('DL thể loại:', response)
+                    setCategories(response.categories)
+                    setFilteredCategories(response.categories);
+                } catch (error) {
+                    console.error("Có lỗi xảy ra khi lấy dữ liệu thể loại sách:", error);
+                }
+            };
+    
+            fetchCategories(); 
         }
     }, [currentView, currentPage]); // Gọi lại hàm khi currentView hoặc currentPage thay đổi
     
@@ -141,7 +282,13 @@ function HomeAdmin() {
                                     {currentView === 'sellers' && (
                                         <>
                                             <th className="align-middle" scope="col">ID</th>
-                                            <th className="align-middle" scope="col">Tên người bán</th>
+                                            <th className="align-middle" scope="col" style={{paddingRight:'125px'}}>Tên người bán</th>
+                                        </>
+                                    )}
+                                    {currentView === 'categories' && (
+                                        <>
+                                            <th className="align-middle" scope="col">ID</th>
+                                            <th className="align-middle" scope="col" style={{paddingRight:'125px'}}>Tên thể loại</th>
                                         </>
                                     )}
                                 </tr>
@@ -172,7 +319,13 @@ function HomeAdmin() {
                                         filteredSellers.map((seller) => (
                                             <tr key={seller.id}>
                                                 <td className="text-center align-middle">{seller.id}</td>
-                                                <td className="text-center align-middle">{seller.name}</td>
+                                                <td className="text-center align-middle">
+                                                    {seller.name}
+                                                    <div className="float-end">
+                                                        <Button className="me-2" variant="primary" onClick={() => handleShow('seller-update', seller.id)}>Sửa</Button>
+                                                        <Button variant="danger" onClick={() => handleShow('seller-delete', seller.id)}>Xóa</Button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
@@ -182,10 +335,31 @@ function HomeAdmin() {
                                             </td>
                                         </tr>
                                     )
-                                )  : (
+                                ) : currentView === 'categories' ? (
+                                    filteredCategories.length > 0 ? (
+                                        filteredCategories.map((category) => (
+                                            <tr key={category.id}>
+                                                <td className="text-center align-middle">{category.id}</td>
+                                                <td className="text-center align-middle">
+                                                    {category.name}
+                                                    <div className="float-end">
+                                                        <Button className="me-2" variant="primary" onClick={() => handleShow('category-update', category.id)}>Sửa</Button>
+                                                        <Button variant="danger" onClick={() => handleShow('category-delete', category.id)}>Xóa</Button>
+                                                    </div>
+                                                    </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="2" className="text-center">
+                                                <p>Không tìm thấy thể loại nào</p>
+                                            </td>
+                                        </tr>
+                                    )
+                                ) : (
                                     <tr>
                                         <td colSpan="9" className="text-center">
-                                            <p>Chọn một loại danh sách từ sidebar</p>
+                                            <p>Chọn một chức năng từ sidebar</p>
                                         </td>
                                     </tr>
                                 )}
@@ -214,11 +388,165 @@ function HomeAdmin() {
                 )}
                 {currentView === 'sellers' && (
                     <>
-                        <Link className='btn btn-primary mt-3' to="/addbooks" style={{marginLeft:"90%"}}>Thêm mới</Link>
+                        <Link className='btn btn-primary mt-3' style={{marginLeft:"90%"}} onClick={() => handleShow('seller')}>Thêm mới</Link>
                         {/* Phân trang (pagination) */}
                     </>
                 )}
+                {currentView === 'categories' && (
+                    <>
+                        <Link className='btn btn-primary mt-3' style={{marginLeft:"90%"}} onClick={() => handleShow('category')}>Thêm mới</Link>
+                    </>
+                )}
             </div>
+
+            {/* Hộp thoại thêm thể loại sách */}
+            <Modal show={activeModal === 'category'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Thêm mới thể loại</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form.Group controlId="formCategoryName">
+                            <Form.Label>Tên thể loại</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên thể loại"
+                                value={cateName}
+                                onChange={(e) => setCateName(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleAddCategory}>
+                        Thêm
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            {/* Thêm mới người bán */}
+            <Modal show={activeModal === 'seller'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Thêm mới người bán</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form.Group controlId="formCategoryName">
+                            <Form.Label>Tên người bán</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên người bán"
+                                value={sellerName}
+                                onChange={(e) => setSellerName(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleAddSeller}>
+                        Thêm
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            <Modal show={activeModal === 'seller-update'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Sửa người bán</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form.Group>
+                            <Form.Label>Tên người bán mới</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên người bán mới"
+                                value={sellerName}
+                                onChange={(e) => setSellerName(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleUpdateSeller}>
+                        Sửa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={activeModal === 'category-update'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Sửa thể loại</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form.Group>
+                            <Form.Label>Tên thể loại mới</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên thể loại mới"
+                                value={cateName}
+                                onChange={(e) => setCateName(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleUpdateCategory}>
+                        Sửa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            <Modal show={activeModal === 'seller-delete'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xóa Người Bán</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa người bán này không?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteSeller}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={activeModal === 'category-delete'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xóa Thể Loại</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa thể loại này không?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteCategory}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             <Footer />
         </>
     );
