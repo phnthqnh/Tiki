@@ -739,3 +739,88 @@ def update_profile(request, un):
     except UserAccount.DoesNotExist:
         return Response({"message": "User không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
 
+# Xem các thể loại sách
+@api_view(['GET'])
+def category_list(request):
+    try:
+        categories = Category.objects.all()
+        r = []
+        for category in categories:
+            s = {
+                'id': category.id,
+                'name': category.name
+            }
+            r.append(s)
+        return Response(r, status=200)
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=404)
+    
+# Thêm thể loại sách
+@api_view(['POST'])
+def add_category(request):
+    try:
+        # Lấy dữ liệu từ request
+        id = request.data.get('id')
+        name = request.data.get('name')
+
+        # Kiểm tra nếu 'name' bị thiếu
+        if not name:
+            return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not id:
+            return Response({'error': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tạo một thể loại mới với UUID tự động
+        category = Category.objects.create(id=id, name=name)
+        category.save()
+
+        return Response({
+            'id': category.id,
+            'name': category.name
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# Sửa thể loại sách
+@api_view(['PUT'])
+def update_category(request, category_id):
+    try:
+        # Lấy thể loại dựa trên ID
+        category = Category.objects.get(id=category_id)
+        
+        # Lấy dữ liệu từ request
+        name = request.data.get('name')
+
+        # Kiểm tra nếu 'name' bị thiếu
+        if not name:
+            return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Cập nhật tên thể loại
+        category.name = name
+        category.save()
+
+        return Response({
+            'id': category.id,
+            'name': category.name
+        }, status=status.HTTP_200_OK)
+        
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# Xóa thể loại sách theo id của thể loại
+@api_view(['DELETE'])
+def delete_category(request, category_id):
+    try:
+        # Lấy thể loại dựa trên ID
+        category = Category.objects.get(id=category_id)
+        category.delete()  # Xóa thể loại
+
+        return Response({'message': 'Category deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -14,9 +14,6 @@ urlpatterns = [
     path('ad/seller/<int:pk>/delete/', delete_seller, name='delete_seller'), 
     path('ad/all_order/', all_order, name='all_order'),
     path('ad/update_order/<str:mvd>/', update_order, name='update_order'),
-    # path('category/', get_all_category, name='get_all_category'),
-    # path('category/<int:pk>/update', update_category, name='update_category'),
-    # path('category/<int:pk>/delete', delete_category, name='delete_category'),
     path('register/', register, name='register'),
     path('login/', login, name='login'),
     path('cart/<str:un>/', get_user_cart, name='get_user_cart'),
@@ -31,4 +28,9 @@ urlpatterns = [
     path('profile/<str:un>/', get_profile, name='add_order'),
     path('profile/<str:un>/update/', update_profile, name='update_profile'),
     path('profile/<str:un>/change_password/', change_password, name='change_password'),
+    # Xem, them, sua, xoa danh sach the loai
+    path('ad/categories', category_list, name='get_categories_list'),
+    path('ad/add_category', add_category, name='add_category'),
+    path('ad/upgrade_category/<int:category_id>/', update_category, name='update_category'),
+    path('ad/delete_category/<int:category_id>/', delete_category, name='delete_category'),
 ]
