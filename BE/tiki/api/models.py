@@ -109,6 +109,7 @@ class Seller(models.Model):
 
 
 class Image(models.Model):
+    name = models.CharField(max_length=5000, blank=True, null=True)
     base_url = models.URLField()
     is_gallery = models.BooleanField(default=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -118,7 +119,7 @@ class Image(models.Model):
     thumbnail_url = models.URLField()
 
     def __str__(self):
-        return self.base_url
+        return self.name
 
 class Book(models.Model):
     id = models.AutoField(primary_key=True)

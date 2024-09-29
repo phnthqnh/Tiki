@@ -11,6 +11,9 @@ function Search(){
     const [suggestions, setSuggestions] = useState([])
     const navigate = useNavigate()
 
+    const staff = localStorage.getItem('is_staff')
+    // console.log(staff)
+
     const handleInputChange = (e) => {
         const value = e.target.value
         setQuery(value)
@@ -26,7 +29,11 @@ function Search(){
 
     const handleSearch = (e) => {
         e.preventDefault()
-        navigate(`/search?q=${query}`)
+        // nếu staff = true thì 
+        if (staff) navigate(`/ad?q=${query}`)
+        else  navigate(`/search?q=${query}`)
+    
+        // navigate(`/search?q=${query}`)
     }
 
     const handleKeyDown = (e) => {

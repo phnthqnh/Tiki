@@ -20,12 +20,17 @@ function Header() {
 
     const username = localStorage.getItem('username');
     const isLoggedIn = Boolean(username); // Trả về true nếu username tồn tại, ngược lại false
+    const is_staff = localStorage.getItem('is_staff')
 
     const handleCartClick = (e) => {
-        if (!isLoggedIn) {
+        if (!isLoggedIn && !is_staff) {
         e.preventDefault(); // Ngăn chặn hành vi mặc định của <Link>
         alert("Chưa đăng nhập, vui lòng đăng nhập trước!");
         navigate('/login');
+        }
+        else if (is_staff){
+            alert("Admin không có giỏ hàng");
+            navigate('/admin');
         }
     };
 
@@ -73,8 +78,8 @@ function Header() {
             {/* Màn hình to */}
             <Container className="d-flex" id="nav">
                 <Col id="logo" className="me-3">
-                    <Navbar href="/" className="d-none d-sm-block">
-                        <a href="/" className="flex-column align-items-center text-decoration-none">
+                    <Navbar href={is_staff ? "/ad" : "/"} className="d-none d-sm-block">
+                        <a href={is_staff ? "/ad" : "/"}  className="flex-column align-items-center text-decoration-none">
                             <img 
                             src={photo} 
                             alt="Tiki Logo"
@@ -88,13 +93,13 @@ function Header() {
                 </Col>
                 <Col sm={3} id="toggle">
                     <Navbar.Collapse id="responsive-navbar-nav">
-                        <Link className='ms-5 link-underline link-underline-opacity-0' to="/">
+                        <Link className='ms-5 link-underline link-underline-opacity-0' to={is_staff ? "/ad" : "/"}>
                             <img
                                 src="https://salt.tikicdn.com/ts/upload/b4/90/74/6baaecfa664314469ab50758e5ee46ca.png"
                                 alt="header_menu_item_home"
                                 id="IMG_2"
                             />
-                            <a rel="nofollow" id="A_2" href='/'>
+                            <a rel="nofollow" id="A_2" >
                                 Trang chủ
                             </a>
                         </Link>
@@ -113,9 +118,19 @@ function Header() {
                                 <span id="A_2">{username}</span>
                                 {showDropdown && (
                                 <div className="dropdown-menu">
-                                    <Link to="/profile">Thông tin cá nhân</Link>
-                                    <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
-                                    <Link onClick={handleLogout}>Đăng xuất</Link>
+                                    {is_staff ? (
+                                        <>
+                                        <Link to="/profile">Thông tin cá nhân</Link>
+                                        {/* <Link to={`/myorder/`}>Đơn hàng của tôi</Link> */}
+                                        <Link onClick={handleLogout}>Đăng xuất</Link>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <Link to="/profile">Thông tin cá nhân</Link>
+                                        <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
+                                        <Link onClick={handleLogout}>Đăng xuất</Link>
+                                    </>
+                                    )}
                                 </div>
                                 )}
                             </Link>
@@ -129,33 +144,14 @@ function Header() {
                                 <span id="A_2">{"Tài khoản"}</span> 
                             </Link>
                         )}
-                        {/* Dropdown menu cho tài khoản */}
-                        {/* <div
-                            className="account-dropdown ms-4"
-                            onMouseEnter={() => setShowDropdown(true)} // Hiện menu khi hover vào icon tài khoản
-                            onMouseLeave={() => setShowDropdown(false)} // Ẩn menu khi chuột ra khỏi
-                            style={{ position: 'relative', cursor: 'pointer' }}
-                        >
-                            <img
-                                src="https://salt.tikicdn.com/ts/upload/07/d5/94/d7b6a3bd7d57d37ef6e437aa0de4821b.png"
-                                alt="header_header_account_img"
-                                id="IMG_2"
-                            />
-                            <span id="A_2">{username ? username : "Tài khoản"}</span>
-                            {/* Menu hiện ra khi hover *
-                            {showDropdown && (
-                                <div className="dropdown-menu">
-                                    <Link to="/profile">Thông tin cá nhân</Link>
-                                    <Link to={`/ordered/${username}`}>Đơn hàng của tôi</Link>
-                                    <Link onClick={handleLogout}>Đăng xuất</Link>
-                                </div>
-                            )}
-                        </div> */}
                         <img className='ps-5' src={ngan} alt="" />
                     </Navbar.Collapse>
                 </Col>
                 {/* Giỏ hàng */}
-                <Link className="nav-link d-none d-sm-block" 
+                { is_staff ? (
+                    <div></div>
+                ) : (
+                    <Link className="nav-link d-none d-sm-block" 
                     to={`cart/${username}`} 
                     style={{ position: 'relative' }}
                     onClick={handleCartClick}>
@@ -167,6 +163,8 @@ function Header() {
                         </span>
                     </div>
                 </Link>
+                )
+                }
             </Container>
         </Navbar>
         <Navbar expand="lg" className="d-sm-none back-color">

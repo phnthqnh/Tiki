@@ -24,7 +24,7 @@ class UserLoginSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
-        fields = ['username', 'password', 'email']
+        fields = ['username', 'password', 'email', 'is_staff']
 
     def create(self, validated_data):
         # Tạo người dùng mới và lưu vào cơ sở dữ liệu
@@ -32,6 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             password=validated_data['password'],
             email=validated_data['email'],
+            is_staff=validated_data['is_staff'],
         )
         return user
     
@@ -107,7 +108,7 @@ class CartSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ['base_url', 'is_gallery', 'label', 'large_url', 'medium_url', 'small_url', 'thumbnail_url']
+        fields = ['base_url', 'name', 'is_gallery', 'label', 'large_url', 'medium_url', 'small_url', 'thumbnail_url']
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
