@@ -195,7 +195,7 @@ function HomeAdmin() {
                 </div>
                 {currentView === 'books' && (
                     <>
-                        <Link className='btn btn-primary mt-3' to="/addbooks" style={{marginLeft:"90%"}}>Thêm sách</Link>
+                        <Link className='btn btn-primary mt-3' to="/ad/book/create" style={{marginLeft:"90%"}}>Thêm sách</Link>
                         {/* Phân trang (pagination) */}
                         <div className="container d-none d-sm-flex d-flex m-5 justify-content-center align-items-center gap-3">
                             {[...Array(totalPages).keys()].map((page) => (

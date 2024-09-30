@@ -31,7 +31,7 @@ const Login = () => {
 
                 alert('Đăng nhập thành công!');
                 if (response.is_staff == true) {
-                    navigate('/admin');
+                    navigate('/ad');
                 }
                 else {
                     navigate('/'); // Chuyển hướng về trang home

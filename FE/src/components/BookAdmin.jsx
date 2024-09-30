@@ -5,9 +5,20 @@ import React, { useState } from "react";
 import bookApi from '../api/book';
 
 function BookAdmin(props) {
-    // const propss = props.data
     const [showMenu, setShowMenu] = useState(false);
-  
+
+    // Hàm để xóa sách
+    const deleteBook = async () => {
+        try {
+            await bookApi.deleteBook(props.data.id); // Gọi `bookApi.deleteBook` với `props.data.id`
+            alert("Xóa thông tin sách thành công"); // Hiển thị thông báo xóa thành công
+            window.location.reload()
+        } catch (error) {
+            console.error('Lỗi khi xóa sách:', error);
+            alert('Xóa thông tin sách thất bại');
+        }
+    }
+
     // Hàm để bật/tắt menu
     const toggleMenu = () => {
         setShowMenu(!showMenu);
@@ -32,7 +43,7 @@ function BookAdmin(props) {
                   >
                     Sửa thông tin
                   </Link>
-                  <button onClick={() => alert("Thông tin đã được xóa")} className="list-group-item list-group-item-action fw-bold">Xóa thông tin</button>
+                  <button onClick={deleteBook} className="list-group-item list-group-item-action fw-bold">Xóa thông tin</button>
                   </div>
                 )}
                 </td>

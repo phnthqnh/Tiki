@@ -16,6 +16,7 @@ import Profile from './pages/Profile.jsx'
 import MyOrderDetail from './pages/MyOrderDetail.jsx'
 import HomeAdmin from './pages/HomeAdmin.jsx'
 import BookAdminDetail from './pages/BookAdminDetail.jsx'
+import AddBook from './pages/AddBook.jsx'
 
 const router = createBrowserRouter ([
     {
@@ -93,6 +94,10 @@ const router = createBrowserRouter ([
     {
         path: '/ad/book/:id/update',
         element: <BookAdminDetail />
+    },
+    {
+        path: '/ad/book/create',
+        element: <AddBook />
     },
 ])
 

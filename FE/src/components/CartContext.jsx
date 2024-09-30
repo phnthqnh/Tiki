@@ -12,10 +12,10 @@ export const CartProvider = ({ children }) => {
         const fetchCart = async () => {
             try {
                 const username = user; // Đảm bảo rằng `user` có giá trị đúng
-                console.log("Fetching cart for username:", username);
+                // console.log("Fetching cart for username:", username);
     
                 const response = await cartApi.getUserCart(username);
-                console.log("API response:", response);
+                // console.log("API response:", response);
     
                 setCartItems(response.book); // Kiểm tra nếu `response.data.book` tồn tại
             } catch (error) {
