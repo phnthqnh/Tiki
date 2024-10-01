@@ -272,7 +272,7 @@ function HomeAdmin() {
             setFilteredOrders(response.orders);
         } catch (error) {
             console.error("Có lỗi xảy ra khi cập nhật đơn hàng:", error);
-            alert("Có lỗi xảy ra khi cập nhật đơn hàng.");
+            alert("Phải chọn giá trị trạng thái");
         }
     };
 
@@ -494,7 +494,7 @@ function HomeAdmin() {
             {/* Sửa trạng thái */}
             <Modal show={activeModal === 'order-update'} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Cập nhật trạng thái đơn hàng</Modal.Title>
+                    <Modal.Title>Cập nhật trạng thái đơn hàng {orderMVD}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={(e) => e.preventDefault()}>
@@ -505,6 +505,7 @@ function HomeAdmin() {
                                 value={orderStatus} 
                                 onChange={(e) => setOrderStatus(e.target.value)}
                             >
+                                <option value="">Chọn...</option>
                                 <option value="Đang chờ xác nhận">Đang chờ xác nhận</option>
                                 <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
                                 <option value="Đang giao hàng">Đang giao hàng</option>
