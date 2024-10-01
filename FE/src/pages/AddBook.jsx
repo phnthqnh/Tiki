@@ -377,7 +377,7 @@ function AddBook() {
                                 />
                         </div>
                         <div className="form-group col-md-3">
-                                <label htmlFor="publication_date">Ngày xuất bản</label>
+                                <label htmlFor="publication_date">Ngày xuất bản*</label>
                                 <input
                                     type="date"
                                     className="form-control"
