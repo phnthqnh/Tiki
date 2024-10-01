@@ -31,7 +31,7 @@ const router = createBrowserRouter ([
     {
         path: '/ad',
         element: <HomeAdmin />
-      },
+    },
     {
         path: '/book/:id',
         element: <BookDetail />

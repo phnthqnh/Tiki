@@ -6,10 +6,6 @@ const sellerApi = {
         const url = '/ad/seller';
         return axiosClient.get(url, {params});
     },
-    // getDetailBook(id) {
-    //     const url = `/book/${id}`;
-    //     return axiosClient.get(url);
-    // },
     addSeller: async (name) => {
         const url ='/ad/seller/create';
         const data = {name};

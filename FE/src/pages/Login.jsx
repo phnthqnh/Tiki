@@ -24,16 +24,18 @@ const Login = () => {
                 localStorage.setItem('userID', response.userID);
                 localStorage.setItem('total_book', response.total_book);
                 localStorage.setItem('is_staff', response.is_staff);
+                localStorage.setItem('is_staff', response.is_staff);
                 // kiểm tra xem username đã được lưu vào localStorage hay chưa, kiểm tra bằng console
                 // console.log('access_token:', localStorage.getItem('access_token'));
                 // console.log('is_staff:', response.is_staff);
                 // console.log('is_superuser:', response.is_superuser);
 
-                alert('Đăng nhập thành công!');
                 if (response.is_staff == true) {
                     navigate('/ad');
+                    alert('Bạn đã đăng nhập với tư cách là người bán!')
                 }
                 else {
+                    alert('Bạn đã đăng nhập với tư cách là người mua!');
                     navigate('/'); // Chuyển hướng về trang home
                 }
             } else {

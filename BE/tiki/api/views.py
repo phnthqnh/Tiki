@@ -868,7 +868,7 @@ def delete_category(request, category_id):
         category.delete()  # Xóa thể loại
 
         return Response({'message': 'Category deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        
+    
     except Category.DoesNotExist:
         return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
