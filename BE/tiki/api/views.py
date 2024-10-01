@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination
+import random
 
 @api_view(['GET'])
 def search(request):
@@ -235,8 +236,15 @@ def create_seller(request):
     if not name:
         return Response({"error": "name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    random_id = random.randint(100, 9999)  # Tạo ID ngẫu nhiên từ 1000 đến 9999
 
-    serializer = SellerSerializer(data=request.data)
+    # Tạo dữ liệu mới bao gồm cả ID và tên người bán
+    seller_data = {
+        'id': random_id,
+        'name': name
+    }
+
+    serializer = SellerSerializer(data=seller_data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -831,7 +839,14 @@ def add_category(request):
         if not name:
             return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = CategorySerializer(data=request.data)
+        random_id = random.randint(100, 9999)
+
+        category_data = {
+            'id': random_id,
+            'name': name
+        }
+
+        serializer = CategorySerializer(data=category_data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

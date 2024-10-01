@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 # Bỏ qua các file log
 *.log
+#Bỏ qua database để tránh thêm xung đột
+db.sqlite3

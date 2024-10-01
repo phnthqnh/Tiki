@@ -29,7 +29,7 @@ function Header() {
         const is_staff = localStorage.getItem('is_staff');
         setIsStaff(is_staff === 'true'); // Đảm bảo so sánh đúng kiểu
     }, []);
-
+    console.log("NV: ", is_staff);
 
     const handleCartClick = (e) => {
         if (!isLoggedIn) {
@@ -95,7 +95,7 @@ function Header() {
             <Container className="d-flex" id="nav">
                 <Col id="logo" className="me-3">
                     <Navbar href="/" className="d-none d-sm-block">
-                        <a href="/" className="flex-column align-items-center text-decoration-none">
+                        <a href={is_staff ? "/ad" : "/"} className="flex-column align-items-center text-decoration-none">
                             <img 
                             src={photo} 
                             alt="Tiki Logo"
@@ -109,15 +109,15 @@ function Header() {
                 </Col>
                 <Col sm={3} id="toggle">
                     <Navbar.Collapse id="responsive-navbar-nav">
-                        <Link className='ms-5 link-underline link-underline-opacity-0' to="/">
+                        <Link className='ms-5 link-underline link-underline-opacity-0' to={is_staff ? "/ad" : "/"}>
                             <img
                                 src="https://salt.tikicdn.com/ts/upload/b4/90/74/6baaecfa664314469ab50758e5ee46ca.png"
                                 alt="header_menu_item_home"
                                 id="IMG_2"
                             />
-                            <a rel="nofollow" id="A_2" href='/'>
+                            <span rel="nofollow" id="A_2">
                                 Trang chủ
-                            </a>
+                            </span>
                         </Link>
                         {username ? (
                             <Link
