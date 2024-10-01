@@ -108,8 +108,8 @@ class Seller(models.Model):
         return self.name
 
 
-class Image(models.Model):
-    name = models.CharField(max_length=5000, blank=True, null=True)
+class Image(models.Model): # ảnh của book
+    name = models.CharField(max_length=5000, blank=True, null=True) # tên của book 
     base_url = models.URLField()
     is_gallery = models.BooleanField(default=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -158,10 +158,10 @@ class Book(models.Model):
             return round((1 - (self.price / self.original_price)) * 100, 2)
         return 0
 
-    def clean(self):
-        # Additional validation before saving
-        if self.list_price < 0 or self.price < 0:
-            raise ValidationError('Price values must be non-negative.')
+    # def clean(self):
+    #     # Additional validation before saving
+    #     if self.list_price < 0 or self.price < 0:
+    #         raise ValidationError('Price values must be non-negative.')
 
     def save(self, *args, **kwargs):
         self.clean()  # Ensure data validation

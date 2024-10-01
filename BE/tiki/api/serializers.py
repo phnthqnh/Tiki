@@ -113,18 +113,85 @@ class ImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = ['id' ,'name']
 
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
-        fields = ['name']
+        fields = ['id', 'name']
 
 class BookSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True, read_only=True)
+    images = ImageSerializer(many=True)
     categories = CategorySerializer(read_only=True)
     current_seller = SellerSerializer(read_only=True)
 
     class Meta:
         model = Book
         fields = '__all__'  # Or specify the fields you want to include
+
+
+    def create(self, validated_data):
+        images_data = validated_data.pop('images', [])
+        # Tạo đối tượng Book
+        book = Book.objects.create(**validated_data)
+
+        # Tạo và liên kết các hình ảnh với đối tượng Book
+        images = []
+        for image_data in images_data:
+            image = Image.objects.create(
+                base_url=image_data.get('base_url'),
+                large_url=image_data.get('large_url'),
+                medium_url=image_data.get('medium_url'),
+                small_url=image_data.get('small_url'),
+                thumbnail_url=image_data.get('thumbnail_url'),
+                is_gallery=image_data.get('is_gallery', True),
+                label=image_data.get('label', None),
+                name=book.name  # Cập nhật tên hình ảnh bằng tên sách
+            )
+            images.append(image)
+                
+        book.images.set(images)  # Thêm hình ảnh vào sách
+
+        book.save()  # Lưu lại sách
+        return book
+
+    def update(self, instance, validated_data):
+        images_data = validated_data.pop('images', [])
+
+        instance.name = validated_data.get('name', instance.name)
+        instance.author = validated_data.get('author', instance.author)
+        instance.description = validated_data.get('description', instance.description)
+        instance.short_description = validated_data.get('short_description', instance.short_description)
+        instance.quantity_in_stock = validated_data.get('quantity_in_stock', instance.quantity_in_stock)
+        instance.list_price = validated_data.get('list_price', instance.list_price)
+        instance.price = validated_data.get('price', instance.price)
+        instance.original_price = validated_data.get('original_price', instance.original_price)
+        instance.rating_average = validated_data.get('rating_average', instance.rating_average)
+        instance.book_cover = validated_data.get('book_cover', instance.book_cover)  # Nếu bạn cho phép cập nhật ảnh bìa
+        instance.categories_id = validated_data.get('categories', instance.categories_id)
+        instance.current_seller_id = validated_data.get('current_seller', instance.current_seller_id)
+
+
+        # Xóa tất cả hình ảnh cũ
+        instance.images.clear()
+        images = []
+        for image_data in images_data:
+            image, created = Image.objects.update_or_create(
+                base_url=image_data.get('base_url'),
+                defaults={
+                    'large_url': image_data.get('large_url'),
+                    'medium_url': image_data.get('medium_url'),
+                    'small_url': image_data.get('small_url'),
+                    'thumbnail_url': image_data.get('thumbnail_url'),
+                    'is_gallery': image_data.get('is_gallery', True),
+                    'label': image_data.get('label', None),
+                    'name': instance.name  # Cập nhật tên hình ảnh bằng tên sách
+                }
+            )
+            images.append(image)  # Thêm hình ảnh vào danh sách tạm thời
+
+        # Sử dụng `set()` để cập nhật danh sách hình ảnh cho đối tượng `instance`
+        instance.images.set(images)
+        instance.save()  # Lưu lại sách
+        return instance
+

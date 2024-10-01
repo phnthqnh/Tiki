@@ -125,10 +125,32 @@ def create_book(request):
         except Seller.DoesNotExist:
             return Response({"error": "Seller not found."}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer.save(categories=category, current_seller=seller)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Tạo sách và liên kết với category và seller
+        book = serializer.save(categories=category, current_seller=seller)
 
+        # Liên kết hình ảnh (nếu có)
+        images_data = request.data.get('images', [])
+        if images_data:
+            images = []
+            for image_data in images_data:
+                image = Image.objects.create(
+                    base_url=image_data['base_url'],
+                    large_url=image_data['large_url'],
+                    medium_url=image_data['medium_url'],
+                    small_url=image_data['small_url'],
+                    thumbnail_url=image_data['thumbnail_url'],
+                    is_gallery=image_data.get('is_gallery', True),
+                    label=image_data.get('label', None),
+                    name=book.name
+                )
+                images.append(image)
+
+            # Sử dụng .set() để thêm danh sách hình ảnh vào sách
+            book.images.set(images)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    (print(serializer.errors))
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 def update_book(request, pk):
     try:
@@ -138,7 +160,31 @@ def update_book(request, pk):
         # Cập nhật thông tin sách từ dữ liệu trong request
         serializer = BookSerializer(book, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            # Cập nhật thông tin
+            book.current_seller_id = request.data.get('current_seller', {}).get('id')
+            book.categories_id = request.data.get('categories', {}).get('id')
+            book.percent = request.data.get('percent', 0)
+            book.rating_average = request.data.get('rating_average', 0)
+            book.quantity_sold = request.data.get('quantity_sold', 0)
+        #     loai_bia: '',
+        # isbn13: '',
+        # dich_gia: '',
+        # publisher_vn: '',
+        # publication_date: '',
+        # edition: '',
+        # dimensions: '',
+        # number_of_page: 0,
+            book.loai_bia = request.data.get('loai_bia', '')
+            book.isbn13 = request.data.get('isbn13', '')
+            book.dich_gia = request.data.get('dich_gia', '')
+            book.publisher_vn = request.data.get('publisher_vn', '')
+            book.publication_date = request.data.get('publication_date', '')
+            book.edition = request.data.get('edition', '')
+            book.dimensions = request.data.get('dimensions', '')
+            book.number_of_page = request.data.get('number_of_page', 0)
+
+            
+            serializer.save()  # Lưu serializer
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -179,7 +225,7 @@ def get_all_seller(request):
             }
             r.append(s)
         return Response({"sellers": r}, status=200)
-    except Book.DoesNotExist:
+    except Seller.DoesNotExist:
         return Response({'error': 'Seller not found'}, status=404)
 
 @api_view(['POST'])
@@ -266,7 +312,7 @@ def all_order(request):
             
             result.append(order_data)
 
-        return Response(result, status=200)
+        return Response({"orders": result}, status=200)
     except Order.DoesNotExist:
         return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -758,3 +804,72 @@ def update_profile(request, un):
     except UserAccount.DoesNotExist:
         return Response({"message": "User không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
 
+# Xem các thể loại sách
+@api_view(['GET'])
+def category_list(request):
+    try:
+        categories = Category.objects.all()
+        r = []
+        for category in categories:
+            s = {
+                'id': category.id,
+                'name': category.name
+            }
+            r.append(s)
+        return Response({"categories": r}, status=200)
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=404)
+    
+# Thêm thể loại sách
+@api_view(['POST'])
+def add_category(request):
+    try:
+        # Lấy dữ liệu từ request
+        name = request.data.get('name')
+
+        # Kiểm tra nếu 'name' bị thiếu
+        if not name:
+            return Response({'error': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# Sửa thể loại sách
+@api_view(['POST'])
+def update_category(request, category_id):
+    try:
+        # Lấy thể loại dựa trên ID
+        category = Category.objects.get(id=category_id)
+        
+        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# Xóa thể loại sách theo id của thể loại
+@api_view(['DELETE'])
+def delete_category(request, category_id):
+    try:
+        # Lấy thể loại dựa trên ID
+        category = Category.objects.get(id=category_id)
+        category.delete()  # Xóa thể loại
+
+        return Response({'message': 'Category deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        
+    except Category.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
