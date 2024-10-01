@@ -1,7 +1,7 @@
-import axios from "axios";
 import axiosClient from "./axios";
 
 const sellerApi = {
+    // for user
     getAllSeller(params) { 
         const url = '/ad/seller';
         return axiosClient.get(url, {params});

@@ -78,7 +78,6 @@ function Header() {
             localStorage.removeItem('access');
             localStorage.removeItem('refresh');
             localStorage.removeItem('username');
-            localStorage.removeItem('is_staff');
             alert('Đăng xuất thành công!');
             // setUsername(null);
 
@@ -95,8 +94,8 @@ function Header() {
             {/* Màn hình to */}
             <Container className="d-flex" id="nav">
                 <Col id="logo" className="me-3">
-                    <Navbar className="d-none d-sm-block">
-                        <a href={is_staff ? "/ad" : "/"}  className="flex-column align-items-center text-decoration-none">
+                    <Navbar href="/" className="d-none d-sm-block">
+                        <a href="/" className="flex-column align-items-center text-decoration-none">
                             <img 
                             src={photo} 
                             alt="Tiki Logo"
@@ -110,13 +109,13 @@ function Header() {
                 </Col>
                 <Col sm={3} id="toggle">
                     <Navbar.Collapse id="responsive-navbar-nav">
-                        <Link className='ms-5 link-underline link-underline-opacity-0'  to={is_staff ? "/ad" : "/"}>
+                        <Link className='ms-5 link-underline link-underline-opacity-0' to="/">
                             <img
                                 src="https://salt.tikicdn.com/ts/upload/b4/90/74/6baaecfa664314469ab50758e5ee46ca.png"
                                 alt="header_menu_item_home"
                                 id="IMG_2"
                             />
-                            <a rel="nofollow" id="A_2">
+                            <a rel="nofollow" id="A_2" href='/'>
                                 Trang chủ
                             </a>
                         </Link>
@@ -135,19 +134,9 @@ function Header() {
                                 <span id="A_2">{username}</span>
                                 {showDropdown && (
                                 <div className="dropdown-menu">
-                                    {is_staff ? (
-                                        <>
-                                        <Link to="/profile">Thông tin cá nhân</Link>
-                                        {/* <Link to={`/myorder/`}>Đơn hàng của tôi</Link> */}
-                                        <Link onClick={handleLogout}>Đăng xuất</Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                        <Link to="/profile">Thông tin cá nhân</Link>
-                                        <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
-                                        <Link onClick={handleLogout}>Đăng xuất</Link>
-                                    </>
-                                    )}
+                                    <Link to="/profile">Thông tin cá nhân</Link>
+                                    <Link to={`/myorder/`}>Đơn hàng của tôi</Link>
+                                    <Link onClick={handleLogout}>Đăng xuất</Link>
                                 </div>
                                 )}
                             </Link>
@@ -164,24 +153,19 @@ function Header() {
                         <img className='ps-5' src={ngan} alt="" />
                     </Navbar.Collapse>
                 </Col>
-                    {/* Giỏ hàng */}
-                    { is_staff ? (
-                        <div></div>
-                    ) : (
-                        <Link className="nav-link d-none d-sm-block" 
-                            to={`cart/${username}`} 
-                            style={{ position: 'relative' }}
-                            onClick={handleCartClick}>
-                            <div id="cart">
-                                <i className="bi bi-cart2 cart-color"></i>
-                                <span class="position-absolute translate-middle badge rounded-pill bg-danger">
-                                {totalBook}
-                                {/* {cartItems.length} */}
-                                </span>
-                            </div>
-                        </Link>
-                    )
-                }
+                {/* Giỏ hàng */}
+                <Link className="nav-link d-none d-sm-block" 
+                    to={`cart/${username}`} 
+                    style={{ position: 'relative' }}
+                    onClick={handleCartClick}>
+                    <div id="cart">
+                        <i className="bi bi-cart2 cart-color"></i>
+                        <span class="position-absolute translate-middle badge rounded-pill bg-danger">
+                        {totalBook}
+                        {/* {cartItems.length} */}
+                        </span>
+                    </div>
+                </Link>
             </Container>
         </Navbar>
         <Navbar expand="lg" className="d-sm-none back-color">

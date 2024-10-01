@@ -24,6 +24,7 @@ const Login = () => {
                 localStorage.setItem('userID', response.userID);
                 localStorage.setItem('total_book', response.total_book);
                 localStorage.setItem('is_staff', response.is_staff);
+                localStorage.setItem('is_staff', response.is_staff);
                 // kiểm tra xem username đã được lưu vào localStorage hay chưa, kiểm tra bằng console
                 // console.log('access_token:', localStorage.getItem('access_token'));
                 // console.log('is_staff:', response.is_staff);

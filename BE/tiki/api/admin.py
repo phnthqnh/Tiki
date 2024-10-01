@@ -22,7 +22,6 @@ admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Category)
 admin.site.register(Seller)
 
-
 class ImageAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
     search_fields = ['name']
