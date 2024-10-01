@@ -113,12 +113,12 @@ class ImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id' ,'name']
+        fields = ['name']
 
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
-        fields = ['id', 'name']
+        fields = ['name']
 
 class BookSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True)

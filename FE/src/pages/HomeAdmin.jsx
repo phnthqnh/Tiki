@@ -31,18 +31,18 @@ function HomeAdmin() {
     const [sellers, setSellers] = useState([]); // Sách lấy từ backend
     const [filteredSellers, setFilteredSellers] = useState([]); // Dữ liệu sellers
     const [currentView, setCurrentView] = useState('books');
-
     const [categories, setCategories] = useState([]);
     const [filteredCategories, setFilteredCategories] = useState([]);
+
+    // Thông tin cho việc thêm mới thể loại và người bán
+    const [cateName, setCateName] = useState('');
+    const [cateId, setCateId] = useState(null);
 
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
 
     const [sellerName, setSellerName] = useState('');
     const [sellerId, setSellerId] = useState(null);
-
-    const [cateName, setCateName] = useState('');
-    const [cateId, setCateId] = useState(null);
 
     const [orderStatus, setOrderStatus] = useState(null);
     const [orderMVD, setOrderMVD] = useState(null);
@@ -54,9 +54,118 @@ function HomeAdmin() {
         setActiveModal(modalName);
         setSellerId(id);
         setCateId(id);
-        setOrderMVD(id)
+        setOrderMVD(id);
     };
-    const handleClose = () => setActiveModal(null);
+    const handleClose = () => setActiveModal(null);    
+    
+
+    // Thêm thể loại
+    const handleAddCategory = async () => {
+        try {
+            await categoryApi.addCategory(cateName);
+            alert("Thêm mới thể loại thành công");
+            setCateName('');
+            handleClose();
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+        } catch(error) {
+            console.error("Có lỗi xảy ra khi thêm thể loại:", error);
+            alert("Có lỗi xảy ra khi thêm thể loại."); 
+        }
+    };
+
+    const handleUpdateCategory = async () => {
+        try {
+            await categoryApi.updateCategory(cateId, cateName);
+            alert("Cập nhật thể loại thành công");
+            
+            setCateName(''); 
+            handleClose();
+            
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi cập nhật thể loại:", error);
+            alert("Có lỗi xảy ra khi cập nhật thể loại.");
+        }
+    };
+
+    const handleDeleteCategory = async () => {
+        try {
+            await categoryApi.deleteCategory(cateId); 
+            alert("Xóa thể loại thành công");
+    
+            //Cập nhật lại danh sách
+            const response = await categoryApi.getAllCategory();
+            setCategories(response.categories)
+            setFilteredCategories(response.categories);
+    
+            handleClose(); // Đóng modal
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi xóa thể loại:", error);
+            alert("Có lỗi xảy ra khi xóa thể loại");
+        }
+        };
+
+    //Thêm người bán
+    const handleAddSeller = async () => {
+        try {
+            await sellerApi.addSeller(sellerName);
+            alert("Thêm mới người bán thành công");
+            setSellerName('');
+            handleClose();
+            //Cập nhật lại danh sách
+            const response = await sellerApi.getAllSeller();
+            setSellers(response.sellers)
+            setFilteredSellers(response.sellers);
+        } catch(error) {
+            console.error("Có lỗi xảy ra khi thêm người bán:", error);
+            alert("Có lỗi xảy ra khi thêm người bán."); 
+        }
+    };
+
+    //Sửa người bán
+    const handleUpdateSeller = async () => {
+        try {
+            // Giả sử sellerId là ID của người bán cần cập nhật
+            await sellerApi.updateSeller(sellerId, sellerName);
+            alert("Cập nhật người bán thành công");
+            
+            setSellerName(''); // Reset tên người bán
+            handleClose(); // Đóng modal
+            
+            // Cập nhật lại danh sách người bán
+            const response = await sellerApi.getAllSeller();
+            setSellers(response.sellers); // Cập nhật state
+            setFilteredSellers(response.sellers); // Cập nhật danh sách đã lọc (nếu có)
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi cập nhật người bán:", error);
+            alert("Có lỗi xảy ra khi cập nhật người bán.");
+        }
+    };
+
+    const handleDeleteSeller = async () => {
+    try {
+        // Gọi API để xóa người bán theo ID
+        await sellerApi.deleteSeller(sellerId); // sellerId là ID của người bán cần xóa
+        alert("Xóa người bán thành công");
+
+        // Cập nhật lại danh sách người bán
+        const response = await sellerApi.getAllSeller();
+        setSellers(response.sellers);
+        setFilteredSellers(response.sellers);
+
+        handleClose(); // Đóng modal
+    } catch (error) {
+        console.error("Có lỗi xảy ra khi xóa người bán:", error);
+        alert("Có lỗi xảy ra khi xóa người bán.");
+    }
+    };
+
 
     // const handleOrderShow = (modalName, id) => {
     //     setActiveModal(modalName);
@@ -94,7 +203,7 @@ function HomeAdmin() {
             const fetchSellers = async () => {
                 try {
                     const response = await sellerApi.getAllSeller(); // Sử dụng phương thức getUserOrder
-                    console.log('DL người bán', response)
+                    console.log('DL người bán:', response)
                     setSellers(response.sellers)
                     setFilteredSellers(response.sellers);
                     // setOrders(response); // Lưu danh sách đơn hàng vào state
@@ -150,117 +259,12 @@ function HomeAdmin() {
     const handlePageChange = (page) => {
         setCurrentPage(page); // Cập nhật trang hiện tại
     };
-     //Thêm người bán
-     const handleAddSeller = async () => {
-        try {
-            await sellerApi.addSeller(sellerName);
-            alert("Thêm mới người bán thành công");
-            setSellerName('');
-            handleClose();
-            //Cập nhật lại danh sách
-            const response = await sellerApi.getAllSeller();
-            setSellers(response.sellers)
-            setFilteredSellers(response.sellers);
-        } catch(error) {
-            console.error("Có lỗi xảy ra khi thêm người bán:", error);
-            alert("Có lỗi xảy ra khi thêm người bán."); 
-        }
-    };
 
-    //Sửa người bán
-    const handleUpdateSeller = async () => {
-        try {
-            // Giả sử sellerId là ID của người bán cần cập nhật
-            await sellerApi.updateSeller(sellerId, sellerName);
-            alert("Cập nhật người bán thành công");
-
-            setSellerName(''); // Reset tên người bán
-            handleClose(); // Đóng modal
-
-            // Cập nhật lại danh sách người bán
-            const response = await sellerApi.getAllSeller();
-            setSellers(response.sellers); // Cập nhật state
-            setFilteredSellers(response.sellers); // Cập nhật danh sách đã lọc (nếu có)
-        } catch (error) {
-            console.error("Có lỗi xảy ra khi cập nhật người bán:", error);
-            alert("Có lỗi xảy ra khi cập nhật người bán.");
-        }
-    };
-
-    const handleDeleteSeller = async () => {
-    try {
-        // Gọi API để xóa người bán theo ID
-        await sellerApi.deleteSeller(sellerId); // sellerId là ID của người bán cần xóa
-        alert("Xóa người bán thành công");
-
-        // Cập nhật lại danh sách người bán
-        const response = await sellerApi.getAllSeller();
-        setSellers(response.sellers);
-        setFilteredSellers(response.sellers);
-
-        handleClose(); // Đóng modal
-    } catch (error) {
-        console.error("Có lỗi xảy ra khi xóa người bán:", error);
-        alert("Có lỗi xảy ra khi xóa người bán.");
-        }
-    };
-
-    // Thêm thể loại
-    const handleAddCategory = async () => {
-        try {
-            await categoryApi.addCategory(cateName);
-            alert("Thêm mới thể loại thành công");
-            setCateName('');
-            handleClose();
-            //Cập nhật lại danh sách
-            const response = await categoryApi.getAllCategory();
-            setCategories(response.categories)
-            setFilteredCategories(response.categories);
-        } catch(error) {
-            console.error("Có lỗi xảy ra khi thêm thể loại:", error);
-            alert("Có lỗi xảy ra khi thêm thể loại."); 
-        }
-    };
-
-    const handleUpdateCategory = async () => {
-        try {
-            await categoryApi.updateCategory(cateId, cateName);
-            alert("Cập nhật thể loại thành công");
-
-            setCateName(''); 
-            handleClose();
-
-            //Cập nhật lại danh sách
-            const response = await categoryApi.getAllCategory();
-            setCategories(response.categories)
-            setFilteredCategories(response.categories);
-        } catch (error) {
-            console.error("Có lỗi xảy ra khi cập nhật thể loại:", error);
-            alert("Có lỗi xảy ra khi cập nhật thể loại.");
-        }
-    };
-
-    const handleDeleteCategory = async () => {
-        try {
-            await categoryApi.deleteCategory(cateId); 
-            alert("Xóa thể loại thành công");
-
-            //Cập nhật lại danh sách
-            const response = await categoryApi.getAllCategory();
-            setCategories(response.categories)
-            setFilteredCategories(response.categories);
-
-            handleClose(); // Đóng modal
-        } catch (error) {
-            console.error("Có lỗi xảy ra khi xóa thể loại:", error);
-            alert("Có lỗi xảy ra khi xóa thể loại");
-        }
-    };
 
     const handleUpdateOrder = async () => {
         try {
             await orderApi.updateStatus(orderMVD, orderStatus);
-            alert("Cập nhật thể loại thành công");
+            alert("Cập nhật trạng thái đơn hàng thành công");
 
             setOrderStatus(''); 
             // handleClose();
@@ -654,6 +658,35 @@ function HomeAdmin() {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={activeModal === 'category-update'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Sửa thể loại</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form.Group>
+                            <Form.Label>Tên thể loại mới</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên thể loại mới"
+                                value={cateName}
+                                onChange={(e) => setCateName(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleUpdateCategory}>
+                        Sửa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
             {/* Xóa người bán */}
             <Modal show={activeModal === 'seller-delete'} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -671,6 +704,24 @@ function HomeAdmin() {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={activeModal === 'category-delete'} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xóa Thể Loại</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa thể loại này không?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteCategory}>
+                        Xóa
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             <Footer />
         </>
     );
