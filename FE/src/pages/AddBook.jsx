@@ -1,6 +1,8 @@
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import bookApi from '../api/book';
+import sellerApi from '../api/seller';
+import categoryApi from '../api/category';
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
@@ -8,16 +10,13 @@ function AddBook() {
     const { id } = useParams();
     const navigate = useNavigate(); // Dùng navigate để điều hướng
     const [book, setBook] = useState(null);
+    const [sellers, setSellers] = useState([]);
+    const [categories, setCategories] = useState([]); // State lưu danh sách categories
     const [error, setError] = useState('');
 
     // Khởi tạo state để lưu thông tin cập nhật sách
     const [formData, setFormData] = useState({
-        images: {
-            base_url: '',
-            large_url: '',
-            medium_url: '',
-            small_url: ''
-        },
+        images: [],
         name: '',
         author: '',
         description: '',
@@ -36,9 +35,9 @@ function AddBook() {
         edition: '',
         dimensions: '',
         number_of_page: 0,
-        categories: '',
-        current_seller: ''
-    });
+        categories: {},
+        current_seller: {},
+    }); 
 
     // Lấy thông tin sách từ API khi component được mount
     const handleCreate = async (e) => {
@@ -51,57 +50,167 @@ function AddBook() {
         } catch (error) {
             console.error('Lỗi khi tạo sách:', error.response);
             setError('Không thể tạo sách.');
-        }
+        } 
     }
+
+    const fetchSellers = async () => {
+        try {
+            const response = await sellerApi.getAllSeller(); // Gọi API lấy danh sách seller
+            // console.log('dl seller', response.sellers)
+            setSellers(response.sellers); // Lưu danh sách seller vào state
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách seller:', error);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await categoryApi.getAllCategory(); // Gọi API lấy danh sách category
+            // console.log('dl category', response.categories)
+            setCategories(response.categories); // Lưu danh sách category vào state
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách seller:', error);
+        }
+    };
 
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (['base_url', 'large_url', 'medium_url', 'small_url'].includes(name)) {
-            // Cập nhật thông tin hình ảnh
+        if (name.startsWith('base_url') || name.startsWith('large_url') 
+            || name.startsWith('medium_url') || name.startsWith('small_url')
+            || name.startsWith('thumbnail_url')) { 
+        // Tìm chỉ số hình ảnh từ name
+            const index = name.replace(/[^0-9]/g, ''); // Lấy chỉ số hình ảnh từ name
+
+            // Cập nhật mảng images trong formData
+            setFormData((prevData) => {
+                const updatedImages = [...prevData.images];
+                updatedImages[index] = {
+                    ...updatedImages[index],
+                    [name.replace(/\d+/, '')]: value, // Cập nhật giá trị tương ứng
+                };
+                return { ...prevData, images: updatedImages };
+            });
+        } else {
             setFormData((prevData) => ({
                 ...prevData,
-                images: {
-                    ...prevData.images,
-                    [name]: value,
-                },
-            }));
-        } else {
-            // Cập nhật các thông tin khác
-            setFormData({
-                ...formData,
                 [name]: value,
-            });
+            }));
         }
     };
+    console.log(formData)
+
+    // Hàm cập nhật formData khi chọn seller
+    const handleSellerChange = (e) => {
+        const selectedSellerId = e.target.value;
+        const selectedSeller = sellers.find((seller) => seller.id === parseInt(selectedSellerId));
+        setFormData({
+            ...formData,
+            current_seller: selectedSeller ? { id: selectedSeller.id, name: selectedSeller.name } : {},
+        });
+    };
+
+    // Hàm cập nhật formData khi chọn category
+    const handleCategoryChange = (e) => {
+        const selectedCategoryId = e.target.value;
+        const selectedCategory = categories.find((category) => category.id === parseInt(selectedCategoryId));
+        setFormData({
+            ...formData,
+            categories: selectedCategory ? { id: selectedCategory.id, name: selectedCategory.name } : {},
+        });
+    };
+
 
     const handleBackClick = () => {
         navigate('/ad'); // Điều hướng về trang listbooks
     };
+    useEffect(() => {
+        fetchSellers();
+        fetchCategories();
+    }, []);
 
+    const addImageField = () => {
+        setFormData((prevData) => ({
+            ...prevData,
+            images: [...prevData.images, { base_url: '', large_url: '', medium_url: '', small_url: '', thumbnail_url: '' }]
+        }));
+    };
 
     return( <>
         <Header/>
         <div className="container bg-white mt-3">
             <div className="row p-2 ">
             <div className="col-md-4">
-                    <img src={""} alt='base_url' style={{width:"20%"}}></img>
-                    <h3 className="mt-3">Ảnh </h3>
-                    {['base_url', 'large_url', 'medium_url', 'small_url'].map((field) => (
-                            <div className="form-group mb-3" key={field}>
-                                <label htmlFor={field}>{field}</label>
-                                <input
-                                    type="url"
-                                    className="form-control"
-                                    id={field}
-                                    name={field}
-                                    value={formData.images[field]}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
+                    <h4 className="mt-3">Ảnh</h4>
+                    <form className="needs-validation d-flex justify-content-between flex-wrap mt-3" noValidate>
+                    {formData.images.map((image, index) => (
+                        <>
+                        <img 
+                            src={image.base_url || 'https://via.placeholder.com/150'}
+                            alt='book'
+                            className='me-4 '
+                            style={{ width: "20%" }}
+                        />
+                        <div className="form-group mb-3">
+                            <label htmlFor={`base_url${index}`}>Base_url</label>
+                            <input
+                                type="url"
+                                className="form-control"
+                                id={`base_url${index}`} 
+                                name={`base_url${index}`} 
+                                value={image.base_url}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group col-5 mb-3">
+                            <label htmlFor={`large_url${index}`}>Large_url</label>
+                            <input
+                                type="url"
+                                className="form-control"
+                                id={`large_url${index}`} 
+                                name={`large_url${index}`} 
+                                value={image.large_url}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group  mb-3">
+                            <label htmlFor={`medium_url${index}`}>Medium_url</label>
+                            <input
+                                type="url"
+                                className="form-control"
+                                id={`medium_url${index}`} 
+                                name={`medium_url${index}`}
+                                value={image.medium_url}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group col-5  mb-3">
+                            <label htmlFor={`small_url${index}`}>Small_url</label>
+                            <input
+                                type="url"
+                                className="form-control"
+                                id={`small_url${index}`} 
+                                name={`small_url${index}`} 
+                                value={image.small_url}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label htmlFor={`thumbnail_url${index}`}>Thumbnail_url</label>
+                            <input
+                                type="url"
+                                className="form-control"
+                                id={`thumbnail_url${index}`} 
+                                name={`thumbnail_url${index}`}
+                                value={image.thumbnail_url}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        </>
                     ))}
-                </div>
+                    <button type="button" className="btn btn-primary" onClick={addImageField}>Thêm ảnh</button>
+                    </form>
+            </div>
                 <div className="col-md-8">
                     <h3>Chỉnh sửa thông tin sách</h3>
                     <form className="needs-validation d-flex flex-wrap justify-content-between mt-3" noValidate>
@@ -313,7 +422,7 @@ function AddBook() {
                         </div>
                         <div className="form-group col-md-4">
                             <label htmlFor="categories" className="form-label">Thể loại *</label>
-                            <select
+                            {/* <select
                                 id="categories"
                                 name="categories" // Thêm name để có thể cập nhật formData
                                 className="form-select"
@@ -321,17 +430,26 @@ function AddBook() {
                                 onChange={handleChange} // Thêm sự kiện onChange
                                 required
                             >
-                                <option value={""}>Chọn...</option>
-                                <option value={"Sách tiếng việt"}>Sách tiếng việt</option>
-                                <option value={"Sách tư duy-Kỹ năng sống"}>Sách tư duy-Kỹ năng sống </option>
-                                <option value={"Sách doanh nhân"}>Sách doanh nhân</option>
-                                <option value={"Sách kỹ năng làm việc"}>Sách kỹ năng làm việc</option>
+                                <option value="">Chọn...</option> 
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.name}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select> */}
+                            <select id="categories" onChange={handleCategoryChange} className="form-select" required>
+                                <option value="">Chọn...</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
                             </select>
                             <div className="invalid-feedback">Vui lòng chọn thể loại.</div>
                         </div>
                         <div className="form-group col-md-4">
                             <label htmlFor="current_seller" className="form-label">Nhà xuất bản *</label>
-                            <select
+                            {/* <select
                                 id="current_seller"
                                 name="current_seller" // Thêm name để có thể cập nhật formData
                                 className="form-select"
@@ -339,11 +457,20 @@ function AddBook() {
                                 onChange={handleChange} // Thêm sự kiện onChange
                                 required
                             >
-                                <option value="">Chọn...</option> {/* Giá trị mặc định cho option */}
-                                <option value="Nhà sách Fahasa">Nhà sách Fahasa</option>
-                                <option value="Eco Trading">Eco Trading</option>
-                                <option value="Sbooks">Sbooks</option>
-                                <option value="BookShop Trading">BookShop Trading</option> 
+                                <option value="">Chọn...</option> 
+                                {sellers.map((seller) => (
+                                    <option key={seller.id} value={seller.name}>
+                                        {seller.name}
+                                    </option>
+                                ))}
+                            </select> */}
+                            <select id="current_seller" onChange={handleSellerChange} className="form-select" required>
+                                <option value="">Chọn...</option>
+                                {sellers.map((seller) => (
+                                    <option key={seller.id} value={seller.id}>
+                                        {seller.name}
+                                    </option>
+                                ))}
                             </select>
                             <div className="invalid-feedback">Vui lòng chọn nhà xuất bản</div>
                         </div>

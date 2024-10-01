@@ -24,7 +24,7 @@ const bookApi = {
         return axiosClient.post(url, formData);
     },
     addBook(formData) {
-        const url = '/ad/book/create';
+        const url = '/ad/book/create/';
         return axiosClient.post(url, formData).then(response => response);
     },
 }

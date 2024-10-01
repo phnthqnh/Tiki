@@ -17,6 +17,7 @@ import MyOrderDetail from './pages/MyOrderDetail.jsx'
 import HomeAdmin from './pages/HomeAdmin.jsx'
 import BookAdminDetail from './pages/BookAdminDetail.jsx'
 import AddBook from './pages/AddBook.jsx'
+import OrderDetail from './pages/OrderDetail.jsx'
 
 const router = createBrowserRouter ([
     {
@@ -98,6 +99,10 @@ const router = createBrowserRouter ([
     {
         path: '/ad/book/create',
         element: <AddBook />
+    },
+    {
+        path: '/ad/book/:mvd',
+        element: <OrderDetail />
     },
 ])
 

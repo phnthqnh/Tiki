@@ -34,6 +34,14 @@ const orderApi = {
         const url = `/myorder/${un}/all/`;
         return axiosClient.get(url);
     },
+    AdminOrder(params) {
+        const url = '/ad/all_order/'
+        return axiosClient.get(url, { params});
+    },
+    updateStatus: async (mvd, status) => {
+        const url = `/ad/update_order/${mvd}/`;
+        return axiosClient.post(url, {status}).then(response => response);
+    },
 };
 
 export default orderApi;
