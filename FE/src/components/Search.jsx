@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { books } from '../../data.json'
 
@@ -10,9 +10,12 @@ function Search(){
     const [query, setQuery] = useState('')
     const [suggestions, setSuggestions] = useState([])
     const navigate = useNavigate()
+    const [staff, setIsStaff] = useState(false)
 
-    const staff = localStorage.getItem('is_staff')
-    // console.log(staff)
+    useEffect(() => {
+        const staff = localStorage.getItem('is_staff');
+        setIsStaff(staff === 'true'); // Đảm bảo so sánh đúng kiểu
+    }, []);
 
     const handleInputChange = (e) => {
         const value = e.target.value
@@ -28,12 +31,12 @@ function Search(){
     }
 
     const handleSearch = (e) => {
+        console.log("staff:", staff)
         e.preventDefault()
         // nếu staff = true thì 
         if (staff) navigate(`/ad?q=${query}`)
         else  navigate(`/search?q=${query}`)
     
-        // navigate(`/search?q=${query}`)
     }
 
     const handleKeyDown = (e) => {

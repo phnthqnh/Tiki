@@ -29,7 +29,7 @@ function Header() {
         const is_staff = localStorage.getItem('is_staff');
         setIsStaff(is_staff === 'true'); // Đảm bảo so sánh đúng kiểu
     }, []);
-    console.log("NV: ", is_staff);
+    // console.log("NV: ", is_staff);
 
     const handleCartClick = (e) => {
         if (!isLoggedIn) {
